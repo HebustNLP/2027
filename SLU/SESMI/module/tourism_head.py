@@ -3,26 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from module.lowRankBilinear import *
 
-class JointPredictor(nn.Module):
-    def __init__(self, hidden_size):
-        super(JointPredictor, self).__init__()
-        self.mlp = nn.Sequential(
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size)
-        )
-        # self.biffine = nn.Bilinear(hidden_size, hidden_size, hidden_size)
-        self.lowRankBilinear = LowRankBilinear(hidden_size, hidden_size, hidden_size, rank = 128)
-        self.ln = nn.LayerNorm(hidden_size)
-        self.dropout = nn.Dropout(0.3)
-
-    def forward(self, x):
-        mlp_output = self.mlp(x)
-        biffine_output = self.lowRankBilinear(x, x)* self.bilin_scale
-        out = x + mlp_output + biffine_output        
-        out = self.ln(out)
-        out = self.dropout(out)
-        return out
 
 class PoolerStartLogits(nn.Module):
     def __init__(self, hidden_size, num_classes, dropout=0.1):
